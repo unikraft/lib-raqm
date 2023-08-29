@@ -1,0 +1,77 @@
+#  libraqm Makefile.uk
+#
+#  Authors: Andrei Tatar <andrei@unikraft.io>
+#
+#  Copyright (c) 2023, Unikraft GmbH and The Unikraft Authors.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libraqm,$(CONFIG_LIBRAQM)))
+
+################################################################################
+# Sources
+################################################################################
+LIBRAQM_VERSION=0.10.1
+LIBRAQM_URL=https://github.com/HOST-Oman/libraqm/releases/download/v$(LIBRAQM_VERSION)/raqm-$(LIBRAQM_VERSION).tar.xz
+LIBRAQM_DIRNAME=raqm-$(LIBRAQM_VERSION)
+#LIBRAQM_PATCHDIR=$(LIBRAQM_BASE)/patches
+$(eval $(call fetch,libraqm,$(LIBRAQM_URL)))
+#$(eval $(call patch,libraqm,$(LIBRAQM_PATCHDIR),$(LIBRAQM_DIRNAME)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBRAQM_SRC = $(LIBRAQM_ORIGIN)/$(LIBRAQM_DIRNAME)
+
+################################################################################
+# Library includes
+################################################################################
+# API
+LIBRAQM__API += -I$(LIBRAQM_SRC)/src
+LIBRAQM__API += -iquote$(LIBRAQM_BASE)/include
+
+CINCLUDES-$(CONFIG_LIBRAQM) += $(LIBRAQM__API)
+CXXINCLUDES-$(CONFIG_LIBRAQM) += $(LIBRAQM__API)
+
+################################################################################
+# Global flags
+################################################################################
+LIBRAQM_CFLAGS += -std=c99
+LIBRAQM_CFLAGS += -DHAVE_CONFIG_H
+
+LIBRAQM_CFLAGS-y += -Winvalid-pch
+
+################################################################################
+# Library sources
+################################################################################
+# These are taken from the upstream build in the order that ninja builds them.
+# Please take care to maintain the order when updating.
+################################################################################
+LIBRAQM_SRCS-y += $(LIBRAQM_SRC)/src/raqm.c
